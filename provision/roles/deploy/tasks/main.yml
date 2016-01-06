@@ -1,0 +1,9 @@
+- name: Setup Virtualenv
+  sudo: yes
+  pip: virtualenv={{ virtualenv_path }} requirements={{ project_path }}/requirements.txt
+
+- name: Django makemigrations
+  django_manage: command=makemigrations app_path={{ project_path }} virtualenv={{ virtualenv_path }}
+
+- name: Django migrate
+  django_manage: command=migrate app_path={{ project_path }} virtualenv={{ virtualenv_path }}

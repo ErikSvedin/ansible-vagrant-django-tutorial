@@ -1,0 +1,48 @@
+- name: Install packages
+  sudo: yes
+  apt: pkg={{ item }} state=installed update_cache=yes
+  with_items:
+      # Database, libpq-dev and python-psycopg2 is needed by ansible
+      # to interact with postgres.
+      - postgresql
+      - libpq-dev
+      - python-psycopg2
+
+      # Python
+      - python-dev
+      - python-setuptools
+      - python-virtualenv
+
+      # Redis
+      - redis-server
+
+      # Since you're a modern web developer. There is a high
+      # chance you're using node in one way or another, so lets install
+      # that along with ruby as well.
+      - nodejs
+      - npm
+      - ruby
+      - ruby-full
+
+- name: Add django user
+  sudo: yes
+  user: name=django password=django
+
+- name: Create virtualenv
+  sudo: yes
+  command: virtualenv /home/django/env creates="/home/django/env"
+
+- name: Create Database
+  sudo: yes
+  sudo_user: postgres
+  postgresql_db: name={{ db_name }}
+
+- name: Create User
+  sudo: yes
+  sudo_user: postgres
+  postgresql_user: name={{ db_user }} password={{ db_password }} state=present role_attr_flags=NOSUPERUSER,CREATEDB
+
+- name: Provide user with DB permissions
+  sudo: yes
+  sudo_user: postgres
+  postgresql_user: user={{ db_user }} db={{ db_name }} priv=ALL
